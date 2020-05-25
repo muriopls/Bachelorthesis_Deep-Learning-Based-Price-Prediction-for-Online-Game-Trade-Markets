@@ -1,7 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="8fb6b6a9-21c4-4248-9cb4-0962ac35f8cb" name="Default Changelist" comment="" />
+    <list default="true" id="8fb6b6a9-21c4-4248-9cb4-0962ac35f8cb" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/model.h5" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/simplified.h5" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/simplified2.h5" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/simplified2_10000.h5" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/simplified2_5000.h5" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/simplified_adam.h5" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/simplified_gradient.h5" beforeDir="false" />
+    </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -18,7 +27,11 @@
       </list>
     </option>
   </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
   <component name="ProjectId" id="1U1oMMI1hqFJybTGnDzQiPGdr0z" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="PropertiesComponent">
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
@@ -135,11 +148,23 @@
       <workItem from="1589405801604" duration="3667000" />
       <workItem from="1589444387518" duration="3939000" />
       <workItem from="1589971360761" duration="8713000" />
+      <workItem from="1590440022824" duration="751000" />
     </task>
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="1" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
