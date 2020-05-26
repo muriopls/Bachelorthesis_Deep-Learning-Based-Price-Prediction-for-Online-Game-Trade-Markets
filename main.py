@@ -148,42 +148,40 @@ def get_features(data):
 def train_and_evaluate_models(batchnorm, x_train, y_train, x_test, L2, optimizer, test_name, to_disk):
     model = keras.models.Sequential()
 
-
-
     # region create and train model
     print('create neural network')
     model.add(layers.Dense(512, use_bias=False))
+
     if batchnorm:
         model.add(layers.BatchNormalization())
     model.add(layers.Activation("relu"))
     model.add(layers.Dense(256, use_bias=False))
+
     if batchnorm:
         model.add(layers.BatchNormalization())
     model.add(layers.Activation("relu"))
     model.add(layers.Dense(128, use_bias=False))
+
     if batchnorm:
         model.add(layers.BatchNormalization())
     model.add(layers.Activation("relu"))
     model.add(layers.Dense(64, use_bias=False))
+
     if batchnorm:
         model.add(layers.BatchNormalization())
     model.add(layers.Activation("relu"))
     model.add(layers.Dense(32, use_bias=False))
+
     model.add(layers.Dense(1, use_bias=False))
 
     log_dir = ""
 
     to_disk = False
     if to_disk:
-        log_dir = "E:\Bachelorarbeit_Informatik\Auswertung\logs\{}\{}_{}".format(experiment_time, datetime.now().strftime("%d%m%Y_%H%M%S"),test_name)
-        # os.mkdir("E:\Bachelorarbeit_Informatik\Auswertung\logs\{}".format(experiment_time))
-        # os.mkdir("E:\Bachelorarbeit_Informatik\Auswertung\logs\{}\{}_{}".format(experiment_time,
-        #                                                                     datetime.now().strftime("%d%m%Y_%H%M%S"),
-        #                                                                     test_name))
+        log_dir = "E:\Bachelorarbeit_Informatik\Auswertung\logs\{}\{}_{}".format(experiment_time, datetime.now().strftime("%d%m%Y_%H%M%S"), test_name)
+
     else:
         log_dir = "logs\\{}\\{}_{}".format(experiment_time, datetime.now().strftime("%d%m%Y_%H%M%S"), test_name)
-        # os.mkdir("logs\\{}".format(experiment_time))
-        # os.mkdir("logs\\{}\\{}_{}".format(experiment_time, datetime.now().strftime("%d%m%Y_%H%M%S"), test_name))
 
     print(log_dir)
 
@@ -198,6 +196,7 @@ def train_and_evaluate_models(batchnorm, x_train, y_train, x_test, L2, optimizer
     print('train neural network')
     history = model.fit(x_train.to_numpy(), y_train.to_numpy(), epochs=epochs, batch_size=batch_size, validation_split=validation_split, callbacks = [tensorboard])
     prediction_list = model.predict(x_test)
+
     if logarithm:
         prediction_list = 10 ** prediction_list
     if normalize:
@@ -505,15 +504,6 @@ def import_data(log, norm, file_path, train_split, exponent):
     y_train = y_data.iloc[:number_of_train_rows, :]
     x_test = x_data.iloc[number_of_train_rows:, :]
     y_test = y_data.iloc[number_of_train_rows:, :]
-
-    # x_train = x_train.to_numpy()
-    # y_train = y_train.to_numpy()
-    # x_test = x_test.to_numpy()
-    # y_test = y_test.to_numpy()
-
-
-
-
     # endregion
 
     # endregion
@@ -599,476 +589,4 @@ for i in range(3):
     prediction = random_forrest(x_tr, y_tr, x_te, L2_matrix)
     # prediction = train_and_evaluate_models(batchnorm, x_tr, y_tr, x_te, L2_matrix, optimizer, name, export_to_disk)
     write_price_differences(prediction, x_te, y_te, L2_matrix, saved_data, parameter_dict)
-
-# selected_features = SetOfFeatures.all_features
-# epochs = 100
-# lr = 0.1
-# batch_size = 32
-# validation_split = 0.3
-# optimizer = RMSprop
-# logarithm = False
-# normalize = False
-# batchnorm = False
-# exponent = False
-# train_split = 0.7
-# file_path = 'C:/Users/murio/PycharmProjects/pricePrediction/first_approach/PriceSnapshot_22-04-2020_xbox_modified.csv'
-# name = 'lr_0.1'
-# parameter_dict = {
-#     'name': name,
-#     'feature_set': selected_features,
-#     'epochs': epochs,
-#     'lr': lr,
-#     'batch_size': batch_size,
-#     'validation_split': validation_split,
-#     'optimizer': optimizer,
-#     'logarithm': logarithm,
-#     'normalize': normalize,
-#     'batchnorm': batchnorm,
-#     'exponent': exponent,
-#     'train_split': train_split,
-#     'file_path': file_path
-# }
-#
-# x_tr, y_tr, x_te, y_te, L2_matrix, saved_data = import_data(logarithm, normalize, file_path, train_split, exponent)
-# for i in range(2):
-#     prediction = train_and_evaluate_models(batchnorm, x_tr, y_tr, x_te, L2_matrix, optimizer, name, export_to_disk)
-#     write_price_differences(prediction, x_te, y_te, L2_matrix, saved_data, parameter_dict)
-#
-# selected_features = SetOfFeatures.all_features
-# epochs = 100
-# lr = 0.05
-# batch_size = 32
-# validation_split = 0.3
-# optimizer = RMSprop
-# logarithm = True
-# normalize = False
-# batchnorm = False
-# exponent = False
-# train_split = 0.7
-# file_path = 'C:/Users/murio/PycharmProjects/pricePrediction/first_approach/PriceSnapshot_22-04-2020_xbox_modified.csv'
-# name = 'lr_0.05'
-# parameter_dict = {
-#     'name': name,
-#     'feature_set': selected_features,
-#     'epochs': epochs,
-#     'lr': lr,
-#     'batch_size': batch_size,
-#     'validation_split': validation_split,
-#     'optimizer': optimizer,
-#     'logarithm': logarithm,
-#     'normalize': normalize,
-#     'batchnorm': batchnorm,
-#     'exponent': exponent,
-#     'train_split': train_split,
-#     'file_path': file_path
-# }
-# x_tr, y_tr, x_te, y_te, L2_matrix, saved_data = import_data(logarithm, normalize, file_path, train_split, exponent)
-# for i in range(2):
-#     prediction = train_and_evaluate_models(batchnorm, x_tr, y_tr, x_te, L2_matrix, optimizer, name, export_to_disk)
-#     write_price_differences(prediction, x_te, y_te, L2_matrix, saved_data, parameter_dict)
-#
-# selected_features = SetOfFeatures.all_features
-# epochs = 100
-# lr = 0.01
-# batch_size = 32
-# validation_split = 0.3
-# optimizer = RMSprop
-# logarithm = False
-# normalize = False
-# batchnorm = False
-# exponent = False
-# train_split = 0.7
-# file_path = 'C:/Users/murio/PycharmProjects/pricePrediction/first_approach/PriceSnapshot_22-04-2020_xbox_modified.csv'
-# name = 'lr_0.01'
-# parameter_dict = {
-#     'name': name,
-#     'feature_set': selected_features,
-#     'epochs': epochs,
-#     'lr': lr,
-#     'batch_size': batch_size,
-#     'validation_split': validation_split,
-#     'optimizer': optimizer,
-#     'logarithm': logarithm,
-#     'normalize': normalize,
-#     'batchnorm': batchnorm,
-#     'exponent': exponent,
-#     'train_split': train_split,
-#     'file_path': file_path
-# }
-# x_tr, y_tr, x_te, y_te, L2_matrix, saved_data = import_data(logarithm, normalize, file_path, train_split, exponent)
-# for i in range(2):
-#     prediction = train_and_evaluate_models(batchnorm, x_tr, y_tr, x_te, L2_matrix, optimizer, name, export_to_disk)
-#     write_price_differences(prediction, x_te, y_te, L2_matrix, saved_data, parameter_dict)
-#
-#
-# selected_features = SetOfFeatures.all_features
-# epochs = 100
-# lr = 0.005
-# batch_size = 32
-# validation_split = 0.3
-# optimizer = RMSprop
-# logarithm = False
-# normalize = False
-# batchnorm = False
-# exponent = False
-# train_split = 0.7
-# file_path = 'C:/Users/murio/PycharmProjects/pricePrediction/first_approach/PriceSnapshot_22-04-2020_xbox_modified.csv'
-# name = 'lr_0.005'
-# parameter_dict = {
-#     'name': name,
-#     'feature_set': selected_features,
-#     'epochs': epochs,
-#     'lr': lr,
-#     'batch_size': batch_size,
-#     'validation_split': validation_split,
-#     'optimizer': optimizer,
-#     'logarithm': logarithm,
-#     'normalize': normalize,
-#     'batchnorm': batchnorm,
-#     'exponent': exponent,
-#     'train_split': train_split,
-#     'file_path': file_path
-# }
-# x_tr, y_tr, x_te, y_te, L2_matrix, saved_data = import_data(logarithm, normalize, file_path, train_split, exponent)
-# for i in range(2):
-#     prediction = train_and_evaluate_models(batchnorm, x_tr, y_tr, x_te, L2_matrix, optimizer, name, export_to_disk)
-#     write_price_differences(prediction, x_te, y_te, L2_matrix, saved_data, parameter_dict)
-#
-# selected_features = SetOfFeatures.all_features
-# epochs = 100
-# lr = 0.001
-# batch_size = 32
-# validation_split = 0.3
-# optimizer = RMSprop
-# logarithm = False
-# normalize = False
-# batchnorm = False
-# exponent = False
-# train_split = 0.7
-# file_path = 'C:/Users/murio/PycharmProjects/pricePrediction/first_approach/PriceSnapshot_22-04-2020_xbox_modified.csv'
-# name = 'lr_0.001'
-# parameter_dict = {
-#     'name': name,
-#     'feature_set': selected_features,
-#     'epochs': epochs,
-#     'lr': lr,
-#     'batch_size': batch_size,
-#     'validation_split': validation_split,
-#     'optimizer': optimizer,
-#     'logarithm': logarithm,
-#     'normalize': normalize,
-#     'batchnorm': batchnorm,
-#     'exponent': exponent,
-#     'train_split': train_split,
-#     'file_path': file_path
-# }
-# x_tr, y_tr, x_te, y_te, L2_matrix, saved_data = import_data(logarithm, normalize, file_path, train_split, exponent)
-# for i in range(2):
-#     prediction = train_and_evaluate_models(batchnorm, x_tr, y_tr, x_te, L2_matrix, optimizer, name, export_to_disk)
-#     write_price_differences(prediction, x_te, y_te, L2_matrix, saved_data, parameter_dict)
-#
-# selected_features = SetOfFeatures.all_features
-# epochs = 100
-# lr = 0.0001
-# batch_size = 32
-# validation_split = 0.3
-# optimizer = RMSprop
-# logarithm = False
-# normalize = False
-# batchnorm = False
-# exponent = False
-# train_split = 0.7
-# file_path = 'C:/Users/murio/PycharmProjects/pricePrediction/first_approach/PriceSnapshot_22-04-2020_xbox_modified.csv'
-# name = 'lr_0.0001'
-# parameter_dict = {
-#     'name': name,
-#     'feature_set': selected_features,
-#     'epochs': epochs,
-#     'lr': lr,
-#     'batch_size': batch_size,
-#     'validation_split': validation_split,
-#     'optimizer': optimizer,
-#     'logarithm': logarithm,
-#     'normalize': normalize,
-#     'batchnorm': batchnorm,
-#     'exponent': exponent,
-#     'train_split': train_split,
-#     'file_path': file_path
-# }
-# x_tr, y_tr, x_te, y_te, L2_matrix, saved_data = import_data(logarithm, normalize, file_path, train_split, exponent)
-# for i in range(2):
-#     prediction = train_and_evaluate_models(batchnorm, x_tr, y_tr, x_te, L2_matrix, optimizer, name, export_to_disk)
-#     write_price_differences(prediction, x_te, y_te, L2_matrix, saved_data, parameter_dict)
-#
-
-
-
-
-# print(svc_param_selection(x_tr, y_tr))
-
-
-# print("SVM now")
-# selected_features = SetOfFeatures.all_features
-# logarithm = False
-# normalize = False
-# x_tr, y_tr, x_te, y_te, L2_matrix, saved_data = import_data(logarithm, normalize, file_path)
-# print("Imported Data")
-# prediction = support_vector_machine(x_tr, y_tr, x_te, L2_matrix)
-# print("Training done")
-# write_price_differences(prediction, name, x_te, y_te, L2_matrix, saved_data)
-
-# epochs = 150
-# lr = 0.01
-# batch_size = 32
-# validation_split = 0.3
-# logarithm = False
-# normalize = True
-# batchnorm = False
-# x_tr, y_tr, x_te, y_te, L2_matrix, saved_data = import_data(logarithm, normalize)
-# for i in range(20):
-#     prediction = train_and_evaluate_models(batchnorm, x_tr, y_tr, x_te, L2_matrix, RMSprop, 'logarithmed y values')
-#     write_price_differences(prediction, 'normalized y values', x_te, y_te, L2_matrix, saved_data)
-#
-# epochs = 150
-# lr = 0.01
-# batch_size = 32
-# validation_split = 0.3
-# logarithm = True
-# normalize = False
-# batchnorm = False
-# x_tr, y_tr, x_te, y_te, L2_matrix, saved_data = import_data(logarithm, normalize)
-# for i in range(20):
-#     prediction = train_and_evaluate_models(batchnorm, x_tr, y_tr, x_te, L2_matrix, RMSprop, 'logarithmed y values')
-#     write_price_differences(prediction, 'logarithmed y values', x_te, y_te, L2_matrix, saved_data)
-#
-# epochs = 150
-# lr = 0.01
-# batch_size = 32
-# validation_split = 0.3
-# logarithm = False
-# normalize = False
-# batchnorm = False
-# x_tr, y_tr, x_te, y_te, L2_matrix, saved_data = import_data(logarithm, normalize)
-# for i in range(20):
-#     prediction = train_and_evaluate_models(batchnorm, x_tr, y_tr, x_te, L2_matrix, RMSprop, 'initial y values')
-#     write_price_differences(prediction, 'initial y values', x_te, y_te, L2_matrix, saved_data)
-#
-# epochs = 150
-# lr = 0.01
-# batch_size = 32
-# validation_split = 0.3
-# logarithm = False
-# normalize = False
-# batchnorm = True
-# x_tr, y_tr, x_te, y_te, L2_matrix, saved_data = import_data(logarithm, normalize)
-# for i in range(20):
-#     prediction = train_and_evaluate_models(batchnorm, x_tr, y_tr, x_te, L2_matrix, RMSprop, 'batch normalization')
-#     write_price_differences(prediction, 'batch normalization', x_te, y_te, L2_matrix, saved_data)
-#
-# epochs = 150
-# lr = 0.01
-# batch_size = 32
-# validation_split = 0.3
-# logarithm = False
-# normalize = False
-# batchnorm = False
-# x_tr, y_tr, x_te, y_te, L2_matrix, saved_data = import_data(logarithm, normalize)
-# for i in range(20):
-#     prediction = train_and_evaluate_models(batchnorm, x_tr, y_tr, x_te, L2_matrix, Adam, 'adam optimizer')
-#     write_price_differences(prediction, 'adam optimizer', x_te, y_te, L2_matrix, saved_data)
-#
-# epochs = 150
-# lr = 0.1
-# batch_size = 32
-# validation_split = 0.3
-# logarithm = False
-# normalize = False
-# batchnorm = False
-# x_tr, y_tr, x_te, y_te, L2_matrix, saved_data = import_data(logarithm, normalize)
-# for i in range(20):
-#     prediction = train_and_evaluate_models(batchnorm, x_tr, y_tr, x_te, L2_matrix, RMSprop, 'learning rate = 0.1')
-#     write_price_differences(prediction, 'learning rate = 0.1', x_te, y_te, L2_matrix, saved_data)
-#
-# epochs = 150
-# lr = 0.05
-# batch_size = 32
-# validation_split = 0.3
-# logarithm = False
-# normalize = False
-# batchnorm = False
-# x_tr, y_tr, x_te, y_te, L2_matrix, saved_data = import_data(logarithm, normalize)
-# for i in range(20):
-#     prediction = train_and_evaluate_models(batchnorm, x_tr, y_tr, x_te, L2_matrix, RMSprop, 'learning rate = 0.05')
-#     write_price_differences(prediction, 'learning rate = 0.05', x_te, y_te, L2_matrix, saved_data)
-#
-# epochs = 150
-# lr = 0.01
-# batch_size = 32
-# validation_split = 0.3
-# logarithm = False
-# normalize = False
-# batchnorm = False
-# x_tr, y_tr, x_te, y_te, L2_matrix, saved_data = import_data(logarithm, normalize)
-# for i in range(20):
-#     prediction = train_and_evaluate_models(batchnorm, x_tr, y_tr, x_te, L2_matrix, RMSprop, 'learning rate = 0.01')
-#     write_price_differences(prediction, 'learning rate = 0.01', x_te, y_te, L2_matrix, saved_data)
-#
-# epochs = 150
-# lr = 0.005
-# batch_size = 32
-# validation_split = 0.3
-# logarithm = False
-# normalize = False
-# batchnorm = False
-# x_tr, y_tr, x_te, y_te, L2_matrix, saved_data = import_data(logarithm, normalize)
-# for i in range(20):
-#     prediction = train_and_evaluate_models(batchnorm, x_tr, y_tr, x_te, L2_matrix, RMSprop, 'learning rate = 0.005')
-#     write_price_differences(prediction, 'learning rate = 0.005', x_te, y_te, L2_matrix, saved_data)
-#
-# epochs = 150
-# lr = 0.01
-# batch_size = 32
-# validation_split = 0.3
-# logarithm = False
-# normalize = False
-# batchnorm = False
-# x_tr, y_tr, x_te, y_te, L2_matrix, saved_data = import_data(logarithm, normalize)
-# for i in range(20):
-#     prediction = train_and_evaluate_models(batchnorm, x_tr, y_tr, x_te, L2_matrix, RMSprop, 'learning rate = 0.001')
-#     write_price_differences(prediction, 'learning rate = 0.001', x_te, y_te, L2_matrix, saved_data)
-#
-#
-# epochs = 50
-# lr = 0.01
-# batch_size = 32
-# validation_split = 0.3
-# logarithm = False
-# normalize = False
-# batchnorm = False
-# x_tr, y_tr, x_te, y_te, L2_matrix, saved_data = import_data(logarithm, normalize)
-# for i in range(20):
-#     prediction = train_and_evaluate_models(batchnorm, x_tr, y_tr, x_te, L2_matrix, RMSprop, '50 Epochs')
-#     write_price_differences(prediction, '50 Epochs', x_te, y_te, L2_matrix, saved_data)
-#
-# epochs = 100
-# lr = 0.01
-# batch_size = 32
-# validation_split = 0.3
-# logarithm = False
-# normalize = False
-# batchnorm = False
-# x_tr, y_tr, x_te, y_te, L2_matrix, saved_data = import_data(logarithm, normalize)
-# for i in range(20):
-#     prediction = train_and_evaluate_models(batchnorm, x_tr, y_tr, x_te, L2_matrix, RMSprop, '100 Epochs')
-#     write_price_differences(prediction, '100 Epochs', x_te, y_te, L2_matrix, saved_data)
-#
-# epochs = 250
-# lr = 0.01
-# batch_size = 32
-# validation_split = 0.3
-# logarithm = False
-# normalize = False
-# batchnorm = False
-# x_tr, y_tr, x_te, y_te, L2_matrix, saved_data = import_data(logarithm, normalize)
-# for i in range(20):
-#     prediction = train_and_evaluate_models(batchnorm, x_tr, y_tr, x_te, L2_matrix, RMSprop, '250 Epochs')
-#     write_price_differences(prediction, '250 Epochs', x_te, y_te, L2_matrix, saved_data)
-#
-# epochs = 150
-# lr = 0.01
-# batch_size = 64
-# validation_split = 0.3
-# logarithm = False
-# normalize = False
-# batchnorm = False
-# x_tr, y_tr, x_te, y_te, L2_matrix, saved_data = import_data(logarithm, normalize)
-# for i in range(20):
-#     prediction = train_and_evaluate_models(batchnorm, x_tr, y_tr, x_te, L2_matrix, RMSprop, 'batchsize 64')
-#     write_price_differences(prediction, 'batchsize 64', x_te, y_te, L2_matrix, saved_data)
-#
-# epochs = 150
-# lr = 0.01
-# batch_size = 128
-# validation_split = 0.3
-# logarithm = False
-# normalize = False
-# batchnorm = False
-# x_tr, y_tr, x_te, y_te, L2_matrix, saved_data = import_data(logarithm, normalize)
-# for i in range(20):
-#     prediction = train_and_evaluate_models(batchnorm, x_tr, y_tr, x_te, L2_matrix, RMSprop, 'batchsize 128')
-#     write_price_differences(prediction, 'batchsize 128', x_te, y_te, L2_matrix, saved_data)
-#
-# epochs = 150
-# lr = 0.01
-# batch_size = 32
-# validation_split = 0.2
-# logarithm = False
-# normalize = False
-# batchnorm = False
-# x_tr, y_tr, x_te, y_te, L2_matrix, saved_data = import_data(logarithm, normalize)
-# for i in range(20):
-#     prediction = train_and_evaluate_models(batchnorm, x_tr, y_tr, x_te, L2_matrix, RMSprop, 'validation split = 0.2')
-#     write_price_differences(prediction, 'validation split = 0.2', x_te, y_te, L2_matrix, saved_data)
-#
-# epochs = 150
-# lr = 0.01
-# batch_size = 32
-# validation_split = 0.4
-# logarithm = False
-# normalize = False
-# batchnorm = False
-# x_tr, y_tr, x_te, y_te, L2_matrix, saved_data = import_data(logarithm, normalize)
-# for i in range(20):
-#     prediction = train_and_evaluate_models(batchnorm, x_tr, y_tr, x_te, L2_matrix, RMSprop, 'validation split = 0.4')
-#     write_price_differences(prediction, 'validation split = 0.4', x_te, y_te, L2_matrix, saved_data)
-#
-# epochs = 150
-# lr = 0.01
-# batch_size = 32
-# validation_split = 0.5
-# logarithm = False
-# normalize = False
-# batchnorm = False
-# x_tr, y_tr, x_te, y_te, L2_matrix, saved_data = import_data(logarithm, normalize)
-# for i in range(20):
-#     prediction = train_and_evaluate_models(batchnorm, x_tr, y_tr, x_te, L2_matrix, RMSprop, 'validation split = 0.5')
-#     write_price_differences(prediction, 'validation split = 0.5', x_te, y_te, L2_matrix, saved_data)
-
-# validation_split = 0.3
-# batchnorm = True
-# x_tr, y_tr, x_te, y_te, L2_matrix, saved_data = import_data(logarithm, normalize)
-# for i in range(10):
-#     prediction = train_and_evaluate_models(batchnorm, x_tr, y_tr, x_te, L2_matrix, RMSprop)
-#     write_price_differences(prediction, '0.3', x_te, y_te, L2_matrix, saved_data)
-
-# validation_split = 0.4
-# x_tr, y_tr, x_te, y_te, L2_matrix, saved_data = import_data(logarithm, normalize)
-# for i in range(10):
-#     prediction = train_and_evaluate_models(batchnorm, x_tr, y_tr, x_te, L2_matrix, RMSprop)
-#     write_price_differences(prediction, '0.4', x_te, y_te, L2_matrix, saved_data)
-#
-# validation_split = 0.5
-# #logarithm = True
-# x_tr, y_tr, x_te, y_te, L2_matrix, saved_data = import_data(logarithm, normalize)
-# for i in range(10):
-#     prediction = train_and_evaluate_models(batchnorm, x_tr, y_tr, x_te, L2_matrix, RMSprop)
-#     write_price_differences(prediction, '0.5', x_te, y_te, L2_matrix, saved_data)
-
-# epochs=500
-# #logarithm = True
-# x_tr, y_tr, x_te, y_te, L2_matrix, saved_data = import_data(logarithm, normalize)
-# for i in range(20):
-#     prediction = train_and_evaluate_models(batchnorm, x_tr, y_tr, x_te, L2_matrix, RMSprop)
-#     write_price_differences(prediction, '500', x_te, y_te, L2_matrix, saved_data)
-
-
-# normalize = True
-# logarithm = False
-# x_tr, y_tr, x_te, y_te, L2_matrix, saved_data = import_data(logarithm, normalize)
-# for i in range(20):
-#     prediction = train_and_evaluate_models(batchnorm, x_tr, y_tr, x_te, L2_matrix)
-#     write_price_differences(prediction, 'Normalized y values', x_te, y_te, L2_matrix, saved_data)
-
-#batchnorm = False
-
 
