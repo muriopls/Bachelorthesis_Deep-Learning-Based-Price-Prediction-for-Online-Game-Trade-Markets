@@ -41,7 +41,7 @@ class SetOfFeatures:
     custom_2 = 8
 
 selected_features = SetOfFeatures.all_features
-price_difference_path = 'C:/Users/murio/PycharmProjects/pricePrediction/price_differences'
+price_difference_path = 'C:/Users/murio/PycharmProjects/Data/pricePrediction/price_differences'
 epochs = 150
 lr = 0.001
 batch_size = 32
@@ -181,20 +181,19 @@ def train_and_evaluate_models(batchnorm, x_train, y_train, x_test, L2, optimizer
         log_dir = "E:\Bachelorarbeit_Informatik\Auswertung\logs\{}\{}_{}".format(experiment_time, datetime.now().strftime("%d%m%Y_%H%M%S"), test_name)
 
     else:
-        log_dir = "logs\\{}\\{}_{}".format(experiment_time, datetime.now().strftime("%d%m%Y_%H%M%S"), test_name)
+        log_dir = "C:\\Users\\murio\\PycharmProjects\\Data\\pricePrediction\\logs\\{}\\{}_{}".format(experiment_time, datetime.now().strftime("%d%m%Y_%H%M%S"), test_name)
 
     print(log_dir)
 
     tensorboard = keras.callbacks.TensorBoard(
-        log_dir= log_dir,
+        log_dir=log_dir,
         histogram_freq=1,
         write_graph=True, write_images=True)
 
-    model.compile(optimizer=optimizer(lr=lr),
-                  loss='mean_squared_error')
+    model.compile(optimizer="adam", lr=lr, loss='mean_absolute_error')
 
     print('train neural network')
-    history = model.fit(x_train.to_numpy(), y_train.to_numpy(), epochs=epochs, batch_size=batch_size, validation_split=validation_split, callbacks = [tensorboard])
+    history = model.fit(x_train.to_numpy(), y_train.to_numpy(), epochs=epochs, batch_size=batch_size, validation_split=validation_split,  callbacks=[tensorboard])
     prediction_list = model.predict(x_test)
 
     if logarithm:
@@ -521,9 +520,9 @@ if export_to_disk:
         experiment_time, "price_differences")
     export_path_file = "E:\Bachelorarbeit_Informatik\Auswertung/{}_{}.csv".format(experiment_time, "rmse")
 else:
-    big_export_path_file = "C:/Users/murio/PycharmProjects/pricePrediction/price_differences/{}_{}.csv".format(
+    big_export_path_file = "C:/Users/murio/PycharmProjects/Data/pricePrediction/price_differences/{}_{}.csv".format(
         experiment_time, "price_differences")
-    export_path_file = "C:/Users/murio/PycharmProjects/pricePrediction/optimization/{}_{}.csv".format(experiment_time, "rmse")
+    export_path_file = "C:/Users/murio/PycharmProjects/Data/pricePrediction/optimization/{}_{}.csv".format(experiment_time, "rmse")
 
 # region testing export header
 csv_header = []
@@ -559,14 +558,14 @@ selected_features = SetOfFeatures.all_features
 epochs = 150
 lr = 0.01
 batch_size = 128
-validation_split = 0.3
+validation_split = 0.2
 optimizer = RMSprop
 logarithm = False
 normalize = False
 batchnorm = False
 exponent = False
 train_split = 0.7
-file_path = 'C:/Users/murio/PycharmProjects/pricePrediction/first_approach/PriceSnapshot_22-04-2020_xbox_modified.csv'
+file_path = 'C:/Users/murio/PycharmProjects/pricePrediction/Data/first_approach/PriceSnapshot_22-04-2020_xbox_modified.csv'
 name = 'linear regression'
 parameter_dict = {
     'name': name,
@@ -586,7 +585,7 @@ parameter_dict = {
 x_tr, y_tr, x_te, y_te, L2_matrix, saved_data = import_data(logarithm, normalize, file_path, train_split, exponent)
 
 for i in range(3):
-    prediction = random_forrest(x_tr, y_tr, x_te, L2_matrix)
-    # prediction = train_and_evaluate_models(batchnorm, x_tr, y_tr, x_te, L2_matrix, optimizer, name, export_to_disk)
+    # prediction = random_forrest(x_tr, y_tr, x_te, L2_matrix)
+    prediction = train_and_evaluate_models(batchnorm, x_tr, y_tr, x_te, L2_matrix, optimizer, name, export_to_disk)
     write_price_differences(prediction, x_te, y_te, L2_matrix, saved_data, parameter_dict)
 
