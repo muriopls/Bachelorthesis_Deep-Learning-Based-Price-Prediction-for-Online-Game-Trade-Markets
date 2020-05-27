@@ -1,32 +1,18 @@
 import csv
-import os
+from datetime import datetime
+from math import sqrt
 
-import tensorflow as tf
-import numpy as np
-import pandas as pd
-from datetime import datetime, timedelta
 import keras
 import keras.layers as layers
 from keras.layers import Dropout
-from keras.optimizers import Adam
-from keras.optimizers import SGD
-from keras.optimizers import RMSprop
-from sklearn.svm import SVC
-from sklearn.linear_model import LinearRegression
 from sklearn import metrics
-from math import sqrt
-from keras import losses
-from keras.layers import Dropout
-from pathlib import Path
-import sklearn
-from sklearn import preprocessing
-from sklearn.model_selection import GridSearchCV
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.tree import DecisionTreeRegressor
-from preprocessing import handcraft_features, import_data, get_features
-from dicts import strong_foot, leagues, nations, positions, working_rate, SetOfFeatures
-from tabulate import tabulate
+from sklearn.linear_model import LinearRegression
+from sklearn.model_selection import GridSearchCV
+from sklearn.svm import SVC
 
+from dicts import SetOfFeatures
+from preprocessing import import_data
 
 # region Predefining
 
@@ -199,6 +185,8 @@ def random_forrest(x_train, y_train, x_test, L2):
 
     return prediction_list
 
+# endregion
+
 def write_price_differences(prediction_list, x_test, y_test_values, L2, saved_dataframe, parameter_dict):
 
     y_test_list = y_test_values.values.tolist()
@@ -227,7 +215,6 @@ def write_price_differences(prediction_list, x_test, y_test_values, L2, saved_da
     csv_header.append('Difference Absolute')
     csv_header.append('Actual')
     csv_header.append('Prediction')
-    csv_header.append('Difference Relative')
     csv_header.append('Name')
     csv_header.extend(list(x_test))
 
@@ -243,15 +230,9 @@ def write_price_differences(prediction_list, x_test, y_test_values, L2, saved_da
             writer = csv.writer(csvFile, delimiter=';')
 
             feature_list = []
-            feature_list.append(int(y_test_values.iloc[i].values[0])-int(prediction_list[i]))
+            feature_list.append(abs(int(y_test_values.iloc[i].values[0])-int(prediction_list[i])))
             feature_list.append(int(y_test_values.iloc[i].values[0]))
             feature_list.append(int(prediction_list[i]))
-            # If predicted value == 0
-            if int(prediction_list[i]) != 0:
-                feature_list.append(float(int(y_test_values.iloc[i].values[0])/int(prediction_list[i])))
-            else:
-                feature_list.append((int(y_test_values.iloc[i].values[0]), int(prediction_list[i]), 'error'))
-            feature_list.append((saved_dataframe.get_value(index_list[i], 'name')))
 
             # re-create feature list
             for feature in list(x_test):
@@ -294,7 +275,7 @@ def write_price_differences(prediction_list, x_test, y_test_values, L2, saved_da
 
 
 
-# endregion
+
 
 
 selected_features = SetOfFeatures.all_features

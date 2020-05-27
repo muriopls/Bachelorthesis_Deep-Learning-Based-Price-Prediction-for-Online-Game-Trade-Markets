@@ -1,10 +1,9 @@
-import csv
-import os
-
-import tensorflow as tf
 import numpy as np
 import pandas as pd
+import tensorflow as tf
+
 from dicts import positions, leagues, working_rate, nations, strong_foot
+
 
 def get_features(data, selected_features):
     if selected_features == 0:
