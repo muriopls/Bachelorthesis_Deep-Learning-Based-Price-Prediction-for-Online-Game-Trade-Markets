@@ -34,11 +34,13 @@ export_path_file = ""
 if export_to_disk:
     big_export_path_file = "E:\Bachelorarbeit_Informatik\Auswertung/{}_{}.csv".format(
         experiment_time, "price_differences")
-    export_path_file = "E:\Bachelorarbeit_Informatik\Auswertung/{}_{}.csv".format(experiment_time, "rmse")
+    export_path_file = "E:\Bachelorarbeit_Informatik\Auswertung/{}_{}.csv".format(
+        experiment_time, "rmse")
 else:
     big_export_path_file = "C:/Users/murio/PycharmProjects/Data/pricePrediction/price_differences/{}_{}.csv".format(
         experiment_time, "price_differences")
-    export_path_file = "C:/Users/murio/PycharmProjects/Data/pricePrediction/optimization/{}_{}.csv".format(experiment_time, "rmse")
+    export_path_file = "C:/Users/murio/PycharmProjects/Data/pricePrediction/optimization/{}_{}.csv".format(
+        experiment_time, "rmse")
 
 # region testing export header
 csv_header = []
@@ -75,50 +77,45 @@ with open(export_path_file, 'a',
 # region different models
 
 
-
 def train_and_evaluate_models(batchnorm, x_train, y_train, x_test, L2, optimizer, test_name, to_disk):
     model = keras.models.Sequential()
 
     # region create and train model
     print('create neural network')
-    model.add(layers.Dense(512, use_bias=False))
-
-    if batchnorm:
-        model.add(layers.BatchNormalization())
-    model.add(layers.Activation("relu"))
-    model.add(layers.Dense(256, use_bias=False))
-
-    model.add(Dropout(0.2))
-
-    if batchnorm:
-        model.add(layers.BatchNormalization())
-    model.add(layers.Activation("relu"))
-    model.add(layers.Dense(128, use_bias=False))
-
-    model.add(Dropout(0.2))
-
-    if batchnorm:
-        model.add(layers.BatchNormalization())
-    model.add(layers.Activation("relu"))
     model.add(layers.Dense(64, use_bias=False))
-
-    model.add(Dropout(0.2))
 
     if batchnorm:
         model.add(layers.BatchNormalization())
     model.add(layers.Activation("relu"))
     model.add(layers.Dense(32, use_bias=False))
 
+    if dropout:
+        model.add(Dropout(0.2))
+
+    if batchnorm:
+        model.add(layers.BatchNormalization())
+    model.add(layers.Activation("relu"))
+    model.add(layers.Dense(16, use_bias=False))
+
+    if dropout:
+        model.add(Dropout(0.2))
+
+    if batchnorm:
+        model.add(layers.BatchNormalization())
+    model.add(layers.Activation("relu"))
+    model.add(layers.Dense(8, use_bias=False))
+
     model.add(layers.Dense(1, use_bias=False))
 
     log_dir = ""
 
-    to_disk = False
+    to_disk = True
     if to_disk:
-        log_dir = "E:\Bachelorarbeit_Informatik\Auswertung\logs\{}\{}_{}".format(experiment_time, datetime.now().strftime("%d%m%Y_%H%M%S"), test_name)
-
+        log_dir = "E:\Bachelorarbeit_Informatik\Auswertung\logs\{}\{}_{}".format(
+            experiment_time, datetime.now().strftime("%d%m%Y_%H%M%S"), test_name)
     else:
-        log_dir = "C:\\Users\\murio\\PycharmProjects\\Data\\pricePrediction\\logs\\{}\\{}_{}".format(experiment_time, datetime.now().strftime("%d%m%Y_%H%M%S"), test_name)
+        log_dir = 'C:\\Users\\murio\\PycharmProjects\\Data\\pricePrediction\\logs\\{}\\{}_{}'.format(
+            experiment_time, datetime.now().strftime("%d%m%Y_%H%M%S"), test_name)
 
     print(log_dir)
 
@@ -130,7 +127,8 @@ def train_and_evaluate_models(batchnorm, x_train, y_train, x_test, L2, optimizer
     model.compile(optimizer=optimizer, lr=lr, loss='mean_absolute_error')
 
     print('train neural network')
-    history = model.fit(x_train.to_numpy(), y_train.to_numpy(), epochs=epochs, batch_size=batch_size, validation_split=validation_split,  callbacks=[tensorboard], verbose=2)
+    history = model.fit(x_train.to_numpy(), y_train.to_numpy(), epochs=epochs, batch_size=batch_size,
+                        validation_split=validation_split,  callbacks=[tensorboard], verbose=2)
     prediction_list = model.predict(x_test)
 
     if logarithm:
@@ -139,6 +137,7 @@ def train_and_evaluate_models(batchnorm, x_train, y_train, x_test, L2, optimizer
         prediction_list = prediction_list * L2[0]
 
     return prediction_list
+
 
 def support_vector_machine(x_train, y_train, x_test, L2):
     model = SVC()
@@ -152,14 +151,16 @@ def support_vector_machine(x_train, y_train, x_test, L2):
 
     return prediction_list
 
+
 def svc_param_selection(X, y):
     Cs = [0.001, 0.01, 0.1, 1, 10]
     gammas = [0.001, 0.01, 0.1, 1]
-    param_grid = {'C': Cs, 'gamma' : gammas}
+    param_grid = {'C': Cs, 'gamma': gammas}
     grid_search = GridSearchCV(SVC(kernel='rbf'), param_grid)
     grid_search.fit(X, y)
     grid_search.best_params_
     return grid_search.best_params_
+
 
 def linear_regression(x_train, y_train, x_test, L2):
     model = LinearRegression()
@@ -173,6 +174,7 @@ def linear_regression(x_train, y_train, x_test, L2):
 
     return prediction_list
 
+
 def random_forrest(x_train, y_train, x_test, L2):
     model = RandomForestClassifier()
     model.fit(x_train, y_train)
@@ -184,6 +186,190 @@ def random_forrest(x_train, y_train, x_test, L2):
         prediction_list = prediction_list * L2[0]
 
     return prediction_list
+
+
+def train_and_evaluate_models_2(batchnorm, x_train, y_train, x_test, L2, optimizer, test_name, to_disk):
+    model = keras.models.Sequential()
+
+    # region create and train model
+    print('create neural network')
+
+    model.add(layers.Dense(256, use_bias=False))
+
+    if dropout:
+        model.add(Dropout(0.2))
+
+    if batchnorm:
+        model.add(layers.BatchNormalization())
+    model.add(layers.Activation("relu"))
+    model.add(layers.Dense(128, use_bias=False))
+
+    if dropout:
+        model.add(Dropout(0.2))
+
+    if batchnorm:
+        model.add(layers.BatchNormalization())
+    model.add(layers.Activation("relu"))
+    model.add(layers.Dense(64, use_bias=False))
+
+    if dropout:
+        model.add(Dropout(0.2))
+
+    model.add(layers.Dense(1, use_bias=False))
+
+    log_dir = ""
+
+    to_disk = True
+    if to_disk:
+        log_dir = "E:\Bachelorarbeit_Informatik\Auswertung\logs\{}\{}_{}".format(
+            experiment_time, datetime.now().strftime("%d%m%Y_%H%M%S"), test_name)
+    else:
+        log_dir = 'C:\\Users\\murio\\PycharmProjects\\Data\\pricePrediction\\logs\\{}\\{}_{}'.format(
+            experiment_time, datetime.now().strftime("%d%m%Y_%H%M%S"), test_name)
+
+    print(log_dir)
+
+    tensorboard = keras.callbacks.TensorBoard(
+        log_dir=log_dir,
+        histogram_freq=1,
+        write_graph=True, write_images=True)
+
+    model.compile(optimizer=optimizer, lr=lr, loss='mean_absolute_error')
+
+    print('train neural network')
+    history = model.fit(x_train.to_numpy(), y_train.to_numpy(), epochs=epochs, batch_size=batch_size,
+                        validation_split=validation_split,  callbacks=[tensorboard], verbose=2)
+    prediction_list = model.predict(x_test)
+
+    if logarithm:
+        prediction_list = 10 ** prediction_list
+    if normalize:
+        prediction_list = prediction_list * L2[0]
+
+    return prediction_list
+
+
+def train_and_evaluate_models_3(batchnorm, x_train, y_train, x_test, L2, optimizer, test_name, to_disk):
+    model = keras.models.Sequential()
+
+    # region create and train model
+    print('create neural network')
+    model.add(layers.Dense(32, use_bias=False))
+
+    if dropout:
+        model.add(Dropout(0.2))
+
+    if batchnorm:
+        model.add(layers.BatchNormalization())
+    model.add(layers.Activation("relu"))
+    model.add(layers.Dense(16, use_bias=False))
+
+    if dropout:
+        model.add(Dropout(0.2))
+
+    if batchnorm:
+        model.add(layers.BatchNormalization())
+    model.add(layers.Activation("relu"))
+    model.add(layers.Dense(8, use_bias=False))
+
+    model.add(layers.Dense(1, use_bias=False))
+
+    log_dir = ""
+
+    to_disk = True
+    if to_disk:
+        log_dir = "E:\Bachelorarbeit_Informatik\Auswertung\logs\{}\{}_{}".format(
+            experiment_time, datetime.now().strftime("%d%m%Y_%H%M%S"), test_name)
+    else:
+        log_dir = 'C:\\Users\\murio\\PycharmProjects\\Data\\pricePrediction\\logs\\{}\\{}_{}'.format(
+            experiment_time, datetime.now().strftime("%d%m%Y_%H%M%S"), test_name)
+
+    print(log_dir)
+
+    tensorboard = keras.callbacks.TensorBoard(
+        log_dir=log_dir,
+        histogram_freq=1,
+        write_graph=True, write_images=True)
+
+    model.compile(optimizer=optimizer, lr=lr, loss='mean_absolute_error')
+
+    print('train neural network')
+    history = model.fit(x_train.to_numpy(), y_train.to_numpy(), epochs=epochs, batch_size=batch_size,
+                        validation_split=validation_split,  callbacks=[tensorboard], verbose=2)
+    prediction_list = model.predict(x_test)
+
+    if logarithm:
+        prediction_list = 10 ** prediction_list
+    if normalize:
+        prediction_list = prediction_list * L2[0]
+
+    return prediction_list
+
+
+def train_and_evaluate_models_4(batchnorm, x_train, y_train, x_test, L2, optimizer, test_name, to_disk):
+    model = keras.models.Sequential()
+
+    # region create and train model
+    print('create neural network')
+    model.add(layers.Dense(64, use_bias=False))
+
+    if dropout:
+        model.add(Dropout(0.2))
+
+    if batchnorm:
+        model.add(layers.BatchNormalization())
+    model.add(layers.Activation("relu"))
+    model.add(layers.Dense(32, use_bias=False))
+
+    if dropout:
+        model.add(Dropout(0.2))
+
+    if batchnorm:
+        model.add(layers.BatchNormalization())
+    model.add(layers.Activation("relu"))
+    model.add(layers.Dense(16, use_bias=False))
+
+    if dropout:
+        model.add(Dropout(0.2))
+
+    if batchnorm:
+        model.add(layers.BatchNormalization())
+    model.add(layers.Activation("relu"))
+    model.add(layers.Dense(8, use_bias=False))
+
+    model.add(layers.Dense(1, use_bias=False))
+
+    log_dir = ""
+
+    to_disk = True
+    if to_disk:
+        log_dir = "E:\Bachelorarbeit_Informatik\Auswertung\logs\{}\{}_{}".format(
+            experiment_time, datetime.now().strftime("%d%m%Y_%H%M%S"), test_name)
+    else:
+        log_dir = 'C:\\Users\\murio\\PycharmProjects\\Data\\pricePrediction\\logs\\{}\\{}_{}'.format(
+            experiment_time, datetime.now().strftime("%d%m%Y_%H%M%S"), test_name)
+
+    print(log_dir)
+
+    tensorboard = keras.callbacks.TensorBoard(
+        log_dir=log_dir,
+        histogram_freq=1,
+        write_graph=True, write_images=True)
+
+    model.compile(optimizer=optimizer, lr=lr, loss='mean_absolute_error')
+
+    print('train neural network')
+    history = model.fit(x_train.to_numpy(), y_train.to_numpy(), epochs=epochs, batch_size=batch_size,
+                        validation_split=validation_split,  callbacks=[tensorboard], verbose=2)
+    prediction_list = model.predict(x_test)
+
+    if logarithm:
+        prediction_list = 10 ** prediction_list
+    if normalize:
+        prediction_list = prediction_list * L2[0]
+
+    return prediction_list
+
 
 # endregion
 
@@ -198,7 +384,7 @@ def write_price_differences(prediction_list, x_test, y_test_values, L2, saved_da
 
     deviation_list = []
     for i in range(len(y_test_values)):
-         deviation_list.extend(abs(prediction_list[i] - y_test_values.iloc[i]))
+        deviation_list.extend(abs(prediction_list[i] - y_test_values.iloc[i]))
 
     print(max(deviation_list), sum(deviation_list) / len(deviation_list))
     print(len(deviation_list))
@@ -215,14 +401,13 @@ def write_price_differences(prediction_list, x_test, y_test_values, L2, saved_da
     csv_header.append('Difference Absolute')
     csv_header.append('Actual')
     csv_header.append('Prediction')
-    csv_header.append('Name')
     csv_header.extend(list(x_test))
 
     with open(big_export_path_file, 'a',
               newline='', encoding="utf-8") as csvFile:
         writer = csv.writer(csvFile, delimiter=';')
         writer.writerow(csv_header)
-        
+
     for i in range(len(y_test_values)):
         # write csv file
         with open(big_export_path_file, 'a',
@@ -230,13 +415,15 @@ def write_price_differences(prediction_list, x_test, y_test_values, L2, saved_da
             writer = csv.writer(csvFile, delimiter=';')
 
             feature_list = []
-            feature_list.append(abs(int(y_test_values.iloc[i].values[0])-int(prediction_list[i])))
+            feature_list.append(
+                abs(int(y_test_values.iloc[i].values[0])-int(prediction_list[i])))
             feature_list.append(int(y_test_values.iloc[i].values[0]))
             feature_list.append(int(prediction_list[i]))
 
             # re-create feature list
             for feature in list(x_test):
-                feature_list.append(saved_dataframe.get_value(index_list[i], feature))
+                feature_list.append(
+                    saved_dataframe.get_value(index_list[i], feature))
 
             # write prediction and feature values
             writer.writerow(feature_list)
@@ -247,10 +434,11 @@ def write_price_differences(prediction_list, x_test, y_test_values, L2, saved_da
     with open(big_export_path_file, 'a',
               newline='') as csvFile:
         writer = csv.writer(csvFile, delimiter=';')
-        writer.writerow((average_deviation, len(deviation_list), parameter_dict['name']))
-    #endregion
+        writer.writerow((average_deviation, len(
+            deviation_list), parameter_dict['name']))
+    # endregion
 
-    #region testing export
+    # region testing export
 
     sum_deviation_list = sum(deviation_list)
     mean_squared_error = int(sum_deviation_list / len(deviation_list))
@@ -264,20 +452,17 @@ def write_price_differences(prediction_list, x_test, y_test_values, L2, saved_da
     for value in parameter_dict.values():
         row_container.append(value)
 
-    #region testing export header rows
+    # region testing export header rows
     with open(export_path_file, 'a',
               newline='') as csvFile:
         writer = csv.writer(csvFile, delimiter=';')
         writer.writerow(row_container)
 
-    #endregion
-    #endregion
+    # endregion
+    # endregion
 
 
-
-
-
-
+# region run tests
 selected_features = SetOfFeatures.all_features
 epochs = 800
 lr = 0.001
@@ -286,11 +471,12 @@ validation_split = 0.2
 optimizer = "adam"
 logarithm = False
 normalize = False
-batchnorm = False
+batchnorm = True
 exponent = False
+dropout = False
 train_split = 0.7
 file_path = 'C:/Users/murio/PycharmProjects/pricePrediction/Data/first_approach/PriceSnapshot_22-04-2020_xbox_modified.csv'
-name = 'linear regression'
+name = 'normal'
 parameter_dict = {
     'name': name,
     'feature_set': selected_features,
@@ -304,12 +490,169 @@ parameter_dict = {
     'batchnorm': batchnorm,
     'exponent': exponent,
     'train_split': train_split,
-    'file_path': file_path
+    'file_path': file_path,
+    'dropout': dropout
 }
-x_tr, y_tr, x_te, y_te, L2_matrix, saved_data = import_data(logarithm, normalize, file_path, train_split, exponent, selected_features)
+x_tr, y_tr, x_te, y_te, L2_matrix, saved_data = import_data(
+    logarithm, normalize, file_path, train_split, exponent, selected_features)
+learning_rate_list = [1, 0.1, 0.05, 0.01, 0.005, 0.001, 0.0005, 0.0001]
+epochs_list = [20, 50, 100, 150, 200, 300, 500]
+batch_size_list = [16, 32, 64, 128, 256, 512]
+train_split_list = [0.6, 0.7, 0.8]
+validation_split_list = [0.1, 0.2, 0.3, 0.4]
+optimizer_list = ["Adam", "RMSprop", "SGD"]
+set_of_features = [0, 1, 2, 3, 4, 5, 6, 7, 8]
 
+
+""" # normal
 for i in range(3):
-    # prediction = random_forrest(x_tr, y_tr, x_te, L2_matrix)
-    prediction = train_and_evaluate_models(batchnorm, x_tr, y_tr, x_te, L2_matrix, optimizer, name, export_to_disk)
-    write_price_differences(prediction, x_te, y_te, L2_matrix, saved_data, parameter_dict)
+    prediction = train_and_evaluate_models(
+        batchnorm, x_tr, y_tr, x_te, L2_matrix, optimizer, name, export_to_disk)
+    write_price_differences(prediction, x_te, y_te,
+                            L2_matrix, saved_data, parameter_dict)
 
+
+# modified data-set
+file_path = 'C:/Users/murio/PycharmProjects/pricePrediction/Data/first_approach/PriceSnapshot_22-04-2020_xbox_modified_removed_outliers.csv'
+x_tr, y_tr, x_te, y_te, L2_matrix, saved_data = import_data(
+    logarithm, normalize, file_path, train_split, exponent, selected_features)
+name = "without_top_15"
+parameter_dict = {
+    'name': name,
+    'feature_set': selected_features,
+    'epochs': epochs,
+    'lr': lr,
+    'batch_size': batch_size,
+    'validation_split': validation_split,
+    'optimizer': optimizer,
+    'logarithm': logarithm,
+    'normalize': normalize,
+    'batchnorm': batchnorm,
+    'exponent': exponent,
+    'train_split': train_split,
+    'file_path': file_path,
+    'dropout': dropout
+}
+for i in range(3):
+    prediction = train_and_evaluate_models(
+        batchnorm, x_tr, y_tr, x_te, L2_matrix, optimizer, name, export_to_disk)
+    write_price_differences(prediction, x_te, y_te,
+                            L2_matrix, saved_data, parameter_dict)
+ """
+# normal 1500 epochs
+file_path = 'C:/Users/murio/PycharmProjects/pricePrediction/Data/first_approach/PriceSnapshot_22-04-2020_xbox_modified.csv'
+x_tr, y_tr, x_te, y_te, L2_matrix, saved_data = import_data(
+    logarithm, normalize, file_path, train_split, exponent, selected_features)
+epochs = 5000
+name = "5000_Epochs"
+parameter_dict = {
+    'name': name,
+    'feature_set': selected_features,
+    'epochs': epochs,
+    'lr': lr,
+    'batch_size': batch_size,
+    'validation_split': validation_split,
+    'optimizer': optimizer,
+    'logarithm': logarithm,
+    'normalize': normalize,
+    'batchnorm': batchnorm,
+    'exponent': exponent,
+    'train_split': train_split,
+    'file_path': file_path,
+    'dropout': dropout
+}
+for i in range(3):
+    prediction = train_and_evaluate_models(
+        batchnorm, x_tr, y_tr, x_te, L2_matrix, optimizer, name, export_to_disk)
+    write_price_differences(prediction, x_te, y_te,
+                            L2_matrix, saved_data, parameter_dict)
+
+# modified data-set 1500 epochs
+file_path = 'C:/Users/murio/PycharmProjects/pricePrediction/Data/first_approach/PriceSnapshot_22-04-2020_xbox_modified_removed_outliers.csv'
+x_tr, y_tr, x_te, y_te, L2_matrix, saved_data = import_data(
+    logarithm, normalize, file_path, train_split, exponent, selected_features)
+epochs = 5000
+name = "without_top_15_5000_Epochs"
+parameter_dict = {
+    'name': name,
+    'feature_set': selected_features,
+    'epochs': epochs,
+    'lr': lr,
+    'batch_size': batch_size,
+    'validation_split': validation_split,
+    'optimizer': optimizer,
+    'logarithm': logarithm,
+    'normalize': normalize,
+    'batchnorm': batchnorm,
+    'exponent': exponent,
+    'train_split': train_split,
+    'file_path': file_path,
+    'dropout': dropout
+}
+for i in range(3):
+    prediction = train_and_evaluate_models(
+        batchnorm, x_tr, y_tr, x_te, L2_matrix, optimizer, name, export_to_disk)
+    write_price_differences(prediction, x_te, y_te,
+                            L2_matrix, saved_data, parameter_dict)
+
+""" for item in set_of_features:
+    selected_features = item
+    name = str(selected_features)
+    parameter_dict = {
+        'name': name,
+        'feature_set': selected_features,
+        'epochs': epochs,
+        'lr': lr,
+        'batch_size': batch_size,
+        'validation_split': validation_split,
+        'optimizer': optimizer,
+        'logarithm': logarithm,
+        'normalize': normalize,
+        'batchnorm': batchnorm,
+        'exponent': exponent,
+        'train_split': train_split,
+        'file_path': file_path,
+        'dropout': dropout
+    }
+    x_tr, y_tr, x_te, y_te, L2_matrix, saved_data = import_data(
+        logarithm, normalize, file_path, train_split, exponent, selected_features)
+    for i in range(10):
+        prediction = train_and_evaluate_models(
+            batchnorm, x_tr, y_tr, x_te, L2_matrix, optimizer, name, export_to_disk)
+        write_price_differences(prediction, x_te, y_te,
+                                L2_matrix, saved_data, parameter_dict)
+ """
+
+# for item in epochs_list:
+#     lr = item
+#     name = "epochs: " + item
+#     for i in range(10):
+#         prediction = train_and_evaluate_models(batchnorm, x_tr, y_tr, x_te, L2_matrix, optimizer, name, export_to_disk)
+#         write_price_differences(prediction, x_te, y_te, L2_matrix, saved_data, parameter_dict)
+#
+
+# for item in batch_size_list:
+#     batch_size = item
+#     name = "batch-size_" + str(item)
+#     parameter_dict = {
+#         'name': name,
+#         'feature_set': selected_features,
+#         'epochs': epochs,
+#         'lr': lr,
+#         'batch_size': batch_size,
+#         'validation_split': validation_split,
+#         'optimizer': optimizer,
+#         'logarithm': logarithm,
+#         'normalize': normalize,
+#         'batchnorm': batchnorm,
+#         'exponent': exponent,
+#         'train_split': train_split,
+#         'file_path': file_path
+#     }
+#     for i in range(10):
+#         prediction = train_and_evaluate_models(batchnorm, x_tr, y_tr, x_te, L2_matrix, optimizer, name, export_to_disk)
+#         write_price_differences(prediction, x_te, y_te, L2_matrix, saved_data, parameter_dict)
+
+# for i in range(10):
+#     prediction = random_forrest(x_tr, y_tr, x_te, L2_matrix)
+#     write_price_differences(prediction, x_te, y_te, L2_matrix, saved_data, parameter_dict)
