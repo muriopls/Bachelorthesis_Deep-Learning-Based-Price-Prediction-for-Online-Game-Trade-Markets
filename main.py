@@ -6,10 +6,10 @@ import keras
 import keras.layers as layers
 from keras.layers import Dropout
 from sklearn import metrics
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import GridSearchCV
-from sklearn.svm import SVC
+from sklearn.svm import SVR
 
 from dicts import SetOfFeatures
 from preprocessing import import_data
@@ -140,7 +140,8 @@ def train_and_evaluate_models(batchnorm, x_train, y_train, x_test, L2, optimizer
 
 
 def support_vector_machine(x_train, y_train, x_test, L2):
-    model = SVC()
+    model = SVR(C=1, epsilon=0.0001, gamma='scale')
+    # model = SVR()
     model.fit(x_train, y_train)
     prediction_list = model.predict(x_test)
 
@@ -153,10 +154,15 @@ def support_vector_machine(x_train, y_train, x_test, L2):
 
 
 def svc_param_selection(X, y):
-    Cs = [0.001, 0.01, 0.1, 1, 10]
-    gammas = [0.001, 0.01, 0.1, 1]
-    param_grid = {'C': Cs, 'gamma': gammas}
-    grid_search = GridSearchCV(SVC(kernel='rbf'), param_grid)
+    Cs = [1e-4, 1e-2,  1]
+    epsilons = [1e-8,  1e-4,  1]
+    gammas = [1e-8,  1e-5,  1e-2, 1, 'scale', 'auto']
+
+    # Cs = [1e-3, 1e-2, 1e-1, 1]
+    # epsilons = [1e-8, 1e-7, 1e-6, 1e-5, 1e-4, 1e-3, 1e-2, 1e-1]
+    # gammas = [1e-8, 1e-7, 1e-6, 1e-5, 1e-4, 1e-3, 1e-2, 1e-1, 'scale', 'auto']
+    param_grid = {'C': Cs, 'epsilon': epsilons, 'gamma': gammas}
+    grid_search = GridSearchCV(SVR(kernel='rbf'), param_grid)
     grid_search.fit(X, y)
     grid_search.best_params_
     return grid_search.best_params_
@@ -176,7 +182,7 @@ def linear_regression(x_train, y_train, x_test, L2):
 
 
 def random_forrest(x_train, y_train, x_test, L2):
-    model = RandomForestClassifier()
+    model = RandomForestRegressor()
     model.fit(x_train, y_train)
     prediction_list = model.predict(x_test)
 
@@ -373,6 +379,13 @@ def train_and_evaluate_models_4(batchnorm, x_train, y_train, x_test, L2, optimiz
 
 # endregion
 
+def test_model(times):
+    for i in range(times):
+        prediction = train_and_evaluate_models(
+            batchnorm, x_tr, y_tr, x_te, L2_matrix, optimizer, name, export_to_disk)
+        write_price_differences(prediction, x_te, y_te,
+                                L2_matrix, saved_data, parameter_dict)
+
 def write_price_differences(prediction_list, x_test, y_test_values, L2, saved_dataframe, parameter_dict):
 
     y_test_list = y_test_values.values.tolist()
@@ -416,7 +429,7 @@ def write_price_differences(prediction_list, x_test, y_test_values, L2, saved_da
 
             feature_list = []
             feature_list.append(
-                abs(int(y_test_values.iloc[i].values[0])-int(prediction_list[i])))
+                 abs(int(y_test_values.iloc[i].values[0])-int(prediction_list[i])))
             feature_list.append(int(y_test_values.iloc[i].values[0]))
             feature_list.append(int(prediction_list[i]))
 
@@ -464,14 +477,14 @@ def write_price_differences(prediction_list, x_test, y_test_values, L2, saved_da
 
 # region run tests
 selected_features = SetOfFeatures.all_features
-epochs = 800
+epochs = 1500
 lr = 0.001
 batch_size = 64
 validation_split = 0.2
 optimizer = "adam"
-logarithm = False
+logarithm = True
 normalize = False
-batchnorm = True
+batchnorm = False
 exponent = False
 dropout = False
 train_split = 0.7
@@ -495,7 +508,8 @@ parameter_dict = {
 }
 x_tr, y_tr, x_te, y_te, L2_matrix, saved_data = import_data(
     logarithm, normalize, file_path, train_split, exponent, selected_features)
-learning_rate_list = [1, 0.1, 0.05, 0.01, 0.005, 0.001, 0.0005, 0.0001]
+learning_rate_list = [0.05, 0.01, 0.001, 0.0001]
+learning_rate_list_2= [1, 0.1, 0.05, 0.01, 0.005, 0.001, 0.0005, 0.0001]
 epochs_list = [20, 50, 100, 150, 200, 300, 500]
 batch_size_list = [16, 32, 64, 128, 256, 512]
 train_split_list = [0.6, 0.7, 0.8]
@@ -503,6 +517,7 @@ validation_split_list = [0.1, 0.2, 0.3, 0.4]
 optimizer_list = ["Adam", "RMSprop", "SGD"]
 set_of_features = [0, 1, 2, 3, 4, 5, 6, 7, 8]
 
+#print(svc_param_selection(x_tr, y_tr))
 
 """ # normal
 for i in range(3):
@@ -539,65 +554,10 @@ for i in range(3):
     write_price_differences(prediction, x_te, y_te,
                             L2_matrix, saved_data, parameter_dict)
  """
-# normal 1500 epochs
-file_path = 'C:/Users/murio/PycharmProjects/pricePrediction/Data/first_approach/PriceSnapshot_22-04-2020_xbox_modified.csv'
-x_tr, y_tr, x_te, y_te, L2_matrix, saved_data = import_data(
-    logarithm, normalize, file_path, train_split, exponent, selected_features)
-epochs = 5000
-name = "5000_Epochs"
-parameter_dict = {
-    'name': name,
-    'feature_set': selected_features,
-    'epochs': epochs,
-    'lr': lr,
-    'batch_size': batch_size,
-    'validation_split': validation_split,
-    'optimizer': optimizer,
-    'logarithm': logarithm,
-    'normalize': normalize,
-    'batchnorm': batchnorm,
-    'exponent': exponent,
-    'train_split': train_split,
-    'file_path': file_path,
-    'dropout': dropout
-}
-for i in range(3):
-    prediction = train_and_evaluate_models(
-        batchnorm, x_tr, y_tr, x_te, L2_matrix, optimizer, name, export_to_disk)
-    write_price_differences(prediction, x_te, y_te,
-                            L2_matrix, saved_data, parameter_dict)
 
-# modified data-set 1500 epochs
-file_path = 'C:/Users/murio/PycharmProjects/pricePrediction/Data/first_approach/PriceSnapshot_22-04-2020_xbox_modified_removed_outliers.csv'
-x_tr, y_tr, x_te, y_te, L2_matrix, saved_data = import_data(
-    logarithm, normalize, file_path, train_split, exponent, selected_features)
-epochs = 5000
-name = "without_top_15_5000_Epochs"
-parameter_dict = {
-    'name': name,
-    'feature_set': selected_features,
-    'epochs': epochs,
-    'lr': lr,
-    'batch_size': batch_size,
-    'validation_split': validation_split,
-    'optimizer': optimizer,
-    'logarithm': logarithm,
-    'normalize': normalize,
-    'batchnorm': batchnorm,
-    'exponent': exponent,
-    'train_split': train_split,
-    'file_path': file_path,
-    'dropout': dropout
-}
-for i in range(3):
-    prediction = train_and_evaluate_models(
-        batchnorm, x_tr, y_tr, x_te, L2_matrix, optimizer, name, export_to_disk)
-    write_price_differences(prediction, x_te, y_te,
-                            L2_matrix, saved_data, parameter_dict)
-
-""" for item in set_of_features:
-    selected_features = item
-    name = str(selected_features)
+for item in learning_rate_list:
+    lr = item
+    name = "lr_" + str(item)
     parameter_dict = {
         'name': name,
         'feature_set': selected_features,
@@ -614,14 +574,106 @@ for i in range(3):
         'file_path': file_path,
         'dropout': dropout
     }
-    x_tr, y_tr, x_te, y_te, L2_matrix, saved_data = import_data(
-        logarithm, normalize, file_path, train_split, exponent, selected_features)
-    for i in range(10):
-        prediction = train_and_evaluate_models(
-            batchnorm, x_tr, y_tr, x_te, L2_matrix, optimizer, name, export_to_disk)
-        write_price_differences(prediction, x_te, y_te,
-                                L2_matrix, saved_data, parameter_dict)
- """
+    test_model(6)
+
+
+# normal 1500 epochs
+
+
+file_path = 'C:/Users/murio/PycharmProjects/pricePrediction/Data/first_approach/PriceSnapshot_22-04-2020_xbox_modified.csv'
+
+logarithm = True
+
+x_tr, y_tr, x_te, y_te, L2_matrix, saved_data = import_data(
+    logarithm, normalize, file_path, train_split, exponent, selected_features)
+
+name = "Logarithm"
+parameter_dict = {
+    'name': name,
+    'feature_set': selected_features,
+    'epochs': epochs,
+    'lr': lr,
+    'batch_size': batch_size,
+    'validation_split': validation_split,
+    'optimizer': optimizer,
+    'logarithm': logarithm,
+    'normalize': normalize,
+    'batchnorm': batchnorm,
+    'exponent': exponent,
+    'train_split': train_split,
+    'file_path': file_path,
+    'dropout': dropout
+}
+
+# test_model(3)
+
+file_path = 'C:/Users/murio/PycharmProjects/pricePrediction/Data/first_approach/PriceSnapshot_22-04-2020_xbox_modified.csv'
+
+logarithm = False
+normalize = True
+
+x_tr, y_tr, x_te, y_te, L2_matrix, saved_data = import_data(
+    logarithm, normalize, file_path, train_split, exponent, selected_features)
+
+name = "Normalize"
+parameter_dict = {
+    'name': name,
+    'feature_set': selected_features,
+    'epochs': epochs,
+    'lr': lr,
+    'batch_size': batch_size,
+    'validation_split': validation_split,
+    'optimizer': optimizer,
+    'logarithm': logarithm,
+    'normalize': normalize,
+    'batchnorm': batchnorm,
+    'exponent': exponent,
+    'train_split': train_split,
+    'file_path': file_path,
+    'dropout': dropout
+}
+
+# test_model(3)
+
+# for i in range(10):
+#     prediction = random_forrest(x_tr, y_tr, x_te, L2_matrix)
+#     write_price_differences(prediction, x_te, y_te,
+#                             L2_matrix, saved_data, parameter_dict)
+
+# for i in range(10):
+#     prediction = linear_regression(x_tr, y_tr, x_te, L2_matrix)
+#     write_price_differences(prediction, x_te, y_te,
+#                             L2_matrix, saved_data, parameter_dict)
+#
+# print(svc_param_selection(x_tr, y_tr))
+
+# prediction = support_vector_machine(x_tr, y_tr, x_te, L2_matrix)
+# write_price_differences(prediction, x_te, y_te,
+#                             L2_matrix, saved_data, parameter_dict)
+#
+# # modified data-set 1500 epochs
+# file_path = 'C:/Users/murio/PycharmProjects/pricePrediction/Data/first_approach/PriceSnapshot_22-04-2020_xbox_modified_removed_outliers.csv'
+# x_tr, y_tr, x_te, y_te, L2_matrix, saved_data = import_data(
+#     logarithm, normalize, file_path, train_split, exponent, selected_features)
+# epochs = 5000
+# name = "without_top_15_5000_Epochs"
+# parameter_dict = {
+#     'name': name,
+#     'feature_set': selected_features,
+#     'epochs': epochs,
+#     'lr': lr,
+#     'batch_size': batch_size,
+#     'validation_split': validation_split,
+#     'optimizer': optimizer,
+#     'logarithm': logarithm,
+#     'normalize': normalize,
+#     'batchnorm': batchnorm,
+#     'exponent': exponent,
+#     'train_split': train_split,
+#     'file_path': file_path,
+#     'dropout': dropout
+# }
+
 
 # for item in epochs_list:
 #     lr = item
