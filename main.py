@@ -77,11 +77,11 @@ np.random.seed(seed)
 
 # region different models
 
-def add_layer(model, neurons, activation="relu"):
+def add_layer(model, neurons, activation="relu", init_mode="glorot_uniform", batchnormalize=False):
 
-    model.add(layers.Dense(neurons, use_bias=False))
+    model.add(layers.Dense(neurons, use_bias=False, kernel_initializer=init_mode))
 
-    if batchnorm:
+    if batchnormalize:
         model.add(layers.BatchNormalization())
 
     model.add(layers.Activation(activation))
@@ -89,19 +89,22 @@ def add_layer(model, neurons, activation="relu"):
     if dropout:
         model.add(Dropout(0.2))
 
-def create_model(hidden_layers=7, neurons=64, learn_rate=0.01, opt="Adam", activation="relu"):
+def create_model(hidden_layers=7, neurons=64, learn_rate=0.01, opt="Adam", activation="relu", init_mode="glorot_uniform", batchnormalize=False):
     model = keras.models.Sequential()
 
     # region create and train model
-    model.add(layers.Dense(x_tr.shape[1], use_bias=False))
+    model.add(layers.Dense(x_tr.shape[1], use_bias=False, kernel_initializer=init_mode))
+
+    if batchnormalize:
+        model.add(layers.BatchNormalization())
 
     for i in range(1, hidden_layers+1):
         if (neurons/(2**(i-1))) < 2:
-            add_layer(model, 2, activation)
+            add_layer(model, 2, activation, init_mode, batchnormalize)
         else:
-            add_layer(model, int(neurons/(2**(i-1))), activation)
+            add_layer(model, int(neurons/(2**(i-1))), activation, init_mode, batchnormalize)
 
-    model.add(layers.Dense(1, use_bias=False))
+    model.add(layers.Dense(1, use_bias=False, kernel_initializer=init_mode))
 
     model.compile(optimizer=opt, lr=learn_rate, loss='mean_absolute_error')
 
@@ -895,16 +898,16 @@ def do_grid_search(x_train, y_train, param_grid, model_func):
     return
 
 # region parameters
-learning_rate_list = [1, 0.01, 0.0001]
+learning_rate_list = [0.001, 0.0001, 0.00001]
 
 epochs_list = [1000]
 batch_size_list = [16]
 hidden_layers_list = [5]
 number_neurons_list = [256]
+batchnorm_list = [True, False]
 
-init_mode = ['uniform', 'lecun_uniform', 'normal', 'zero', 'glorot_normal', 'glorot_uniform', 'he_normal', 'he_uniform']
+init_mode_list = ['lecun_uniform', 'glorot_normal', 'glorot_uniform']
 optimizer_list = ["Adam", "RMSprop", "SGD"]
-activation_list = ['softmax', 'softplus', 'softsign', 'relu', 'tanh', 'sigmoid', 'hard_sigmoid', 'linear']
 
 weight_constraint = [1, 2, 3, 4, 5]
 dropout_rate = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
@@ -920,6 +923,7 @@ set_of_features = [0, 1, 2, 3, 4, 5, 6, 7, 8]
 #     write_price_differences(prediction, x_te, y_te,
 #                             L2_matrix, saved_data, parameter_dict)
 
+print("Gridesearch Durchlauf 1")
 experiment_time = datetime.now().strftime("%Y%m%d_%H%M")
 export_to_disk = False
 big_export_path_file = ""
@@ -935,8 +939,10 @@ else:
     export_path_file = "C:/Users/murio/PycharmProjects/Data/pricePrediction/optimization/{}_{}.csv".format(
         experiment_time, "rmse")
 
-parameters = dict(batch_size=batch_size_list, epochs=epochs_list, hidden_layers=hidden_layers_list, neurons = number_neurons_list, learn_rate=learning_rate_list, opt= optimizer_list)
+parameters = dict(batch_size=batch_size_list, epochs=epochs_list, hidden_layers=hidden_layers_list, neurons = number_neurons_list, learn_rate=learning_rate_list, init_mode=init_mode_list, batchnormalize=batchnorm_list)
 do_grid_search(x_tr, y_tr, parameters, create_model)
+
+
 # do_grid_search(x_tr, y_tr, parameters, create_model9)
 # do_grid_search(x_tr, y_tr, parameters, create_model10)
 # do_grid_search(x_tr, y_tr, parameters, create_model_up)
