@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import tensorflow as tf
+from sklearn.preprocessing import MinMaxScaler
 
 from dicts import positions, leagues, working_rate, nations, strong_foot
 
@@ -46,10 +47,10 @@ def handcraft_features(data_to_handcraft):
     return data_to_handcraft
 
 
-def import_data(log, norm, file_path, train_split, exponent, selected_features):
+def import_data(log, norm, file_path, train_split, selected_features):
     # region Import data
     imported_data = pd.read_csv(file_path, sep=';', encoding='mac_roman')
-
+    target_scaler = None
     # endregion
 
     imported_data = handcraft_features(imported_data)
@@ -122,46 +123,6 @@ def import_data(log, norm, file_path, train_split, exponent, selected_features):
     # features['aggression'] = pd.to_numeric(features['aggression'], errors='coerce')
     # endregion
 
-    if exponent:
-        print(features['overall_rating'])
-        features['overall_rating'] = pd.to_numeric(features['overall_rating'], errors='coerce') ** 10
-        print(features['overall_rating'])
-        features['pac'] = pd.to_numeric(features['pac'], errors='coerce') ** 10
-        features['sho'] = pd.to_numeric(features['sho'], errors='coerce') ** 10
-        features['pas'] = pd.to_numeric(features['pas'], errors='coerce') ** 10
-        features['dri'] = pd.to_numeric(features['dri'], errors='coerce') ** 10
-        features['def'] = pd.to_numeric(features['def'], errors='coerce') ** 10
-        features['phy'] = pd.to_numeric(features['phy'], errors='coerce') ** 10
-        features['acceleration'] = pd.to_numeric(features['acceleration'], errors='coerce') ** 10
-        features['sprintspeed'] = pd.to_numeric(features['sprintspeed'], errors='coerce') ** 10
-        features['positioning'] = pd.to_numeric(features['positioning'], errors='coerce') ** 10
-        features['finishing'] = pd.to_numeric(features['finishing'], errors='coerce') ** 10
-        features['shotpower'] = pd.to_numeric(features['shotpower'], errors='coerce') ** 10
-        features['longshots'] = pd.to_numeric(features['longshots'], errors='coerce') ** 10
-        features['volleys'] = pd.to_numeric(features['volleys'], errors='coerce') ** 10
-        features['penalties'] = pd.to_numeric(features['penalties'], errors='coerce') ** 10
-        features['vision'] = pd.to_numeric(features['vision'], errors='coerce') ** 10
-        features['crossing'] = pd.to_numeric(features['crossing'], errors='coerce') ** 10
-        features['freekickaccuracy'] = pd.to_numeric(features['freekickaccuracy'], errors='coerce') ** 10
-        features['shortpassing'] = pd.to_numeric(features['shortpassing'], errors='coerce') ** 10
-        features['longpassing'] = pd.to_numeric(features['longpassing'], errors='coerce') ** 10
-        features['curve'] = pd.to_numeric(features['curve'], errors='coerce') ** 10
-        features['agility'] = pd.to_numeric(features['agility'], errors='coerce') ** 10
-        features['balance'] = pd.to_numeric(features['balance'], errors='coerce') ** 10
-        features['reactions'] = pd.to_numeric(features['reactions'], errors='coerce') ** 10
-        features['ballcontrol'] = pd.to_numeric(features['ballcontrol'], errors='coerce') ** 10
-        features['dribbling'] = pd.to_numeric(features['dribbling'], errors='coerce') ** 10
-        features['composure'] = pd.to_numeric(features['composure'], errors='coerce') ** 10
-        features['interceptions'] = pd.to_numeric(features['interceptions'], errors='coerce') ** 10
-        features['headingaccuracy'] = pd.to_numeric(features['headingaccuracy'], errors='coerce') ** 10
-        features['marking'] = pd.to_numeric(features['marking'], errors='coerce') ** 10
-        features['standingtackle'] = pd.to_numeric(features['standingtackle'], errors='coerce') ** 10
-        features['slidingtackle'] = pd.to_numeric(features['slidingtackle'], errors='coerce') ** 10
-        features['jumping'] = pd.to_numeric(features['jumping'], errors='coerce') ** 10
-        features['stamina'] = pd.to_numeric(features['stamina'], errors='coerce') ** 10
-        features['strength'] = pd.to_numeric(features['strength'], errors='coerce') ** 10
-        features['aggression'] = pd.to_numeric(features['aggression'], errors='coerce') ** 10
-
     # region train and test split
 
     L2 = np.sqrt(np.sum(np.multiply(features, features), axis=0))
@@ -173,6 +134,10 @@ def import_data(log, norm, file_path, train_split, exponent, selected_features):
 
     # Logarithm
     if norm:
+        #target_scaler = MinMaxScaler()
+        #target_scaler.fit(y_data)
+        #y_data = pd.DataFrame(target_scaler.transform(y_data))
+
         y_data = y_data/L2[0]
     # Normalization
     if log:
@@ -187,4 +152,4 @@ def import_data(log, norm, file_path, train_split, exponent, selected_features):
     # endregion
 
     # endregion
-    return x_train, y_train, x_test, y_test, L2, saved_dataframe
+    return x_train, y_train, x_test, y_test, L2, saved_dataframe, target_scaler
