@@ -4,8 +4,8 @@ GIT repository for my Bachelorthesis about "Deep Learning-Based Price Prediction
 ## Structure
 
 The project contains two different python projects: <br />
-* A selenium based website-scraper to extract the player base data of the FIFA20 players. <br />
-* The regression implementation, which contains the four models: <br />
+* A selenium based website-scraper to extract the player base data of the FIFA20 players in the folder *Selenium_Script*. <br />
+* The regression implementation in the folder *Regression*, which contains the four models: <br />
 *Linear Regression, Support Vector Regression, Random Forest* and *Deep Neural Network* 
 
 ### Selenium Script
