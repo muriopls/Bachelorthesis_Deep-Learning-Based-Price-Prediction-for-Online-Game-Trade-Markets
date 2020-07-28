@@ -31,6 +31,9 @@ def get_features(data, selected_features):
         del features['birthday']
         del features['international_rep']
         del features['revision']
+    elif selected_features == 9:
+        features = data[['avg_price', 'overall_rating', 'acceleration', 'sprintspeed', 'positioning', 'finishing', 'shotpower', 'longshots', 'volleys', 'penalties', 'vision', 'crossing', 'freekickaccuracy', 'shortpassing', 'longpassing', 'curve', 'agility', 'balance', 'reactions', 'ballcontrol', 'dribbling', 'composure', 'interceptions', 'headingaccuracy', 'marking', 'standingtackle', 'slidingtackle', 'jumping', 'stamina', 'strength', 'aggression']].copy()
+
 
     return features
 
@@ -40,7 +43,7 @@ def handcraft_features(data_to_handcraft):
     data_to_handcraft['league'] = data_to_handcraft['league'].map(leagues)
     data_to_handcraft['league'] = data_to_handcraft['league'].fillna(0)
     data_to_handcraft['nation'] = data_to_handcraft['nation'].map(nations)
-    data_to_handcraft['nation'] = data_to_handcraft['nation'].fillna(1)
+    data_to_handcraft['nation'] = data_to_handcraft['nation'].fillna(0)
     data_to_handcraft['defensive_work_rates'] = data_to_handcraft['defensive_work_rates'].map(working_rate)
     data_to_handcraft['offensive_work_rates'] = data_to_handcraft['offensive_work_rates'].map(working_rate)
     data_to_handcraft['foot'] = data_to_handcraft['foot'].map(strong_foot)

@@ -2,6 +2,7 @@ import csv
 from datetime import datetime
 from math import sqrt
 import statistics
+import math
 
 import keras
 import keras.layers as layers
@@ -13,6 +14,9 @@ from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import GridSearchCV
 from sklearn.svm import SVR
 from keras.wrappers.scikit_learn import KerasRegressor
+from keras.constraints import maxnorm
+from keras.callbacks import EarlyStopping, ModelCheckpoint
+from keras.models import load_model
 import pandas as pd
 
 # region export file initialization
@@ -21,41 +25,47 @@ BIG_EXPORT_PATH_FILE = "C:/Users/murio/PycharmProjects/Data/pricePrediction/pric
     EXPERIMENT_TIME, "price_differences")
 EXPORT_PATH_FILE = "C:/Users/murio/PycharmProjects/Data/pricePrediction/optimization/{}_{}.csv".format(
     EXPERIMENT_TIME, "rmse")
+CHECKPOINT_PATH = "C:/Users/murio/PycharmProjects/Data/pricePrediction/checkpoint/{}_{}.h5".format(
+    EXPERIMENT_TIME, "model")
 # endregion
 
 # region Deep Learning
 
-def add_layer(model, neurons, activation="relu", init_mode="glorot_uniform", batchnormalize=False, dropout=False):
+def add_layer(model, neurons, activation="relu", init_mode="he_normal", batchnormalize=False, dropout=False, dropout_rate=0.1):
 
-    model.add(layers.Dense(neurons, use_bias=False, kernel_initializer=init_mode))
+    model.add(layers.Dense(neurons, use_bias=False, kernel_initializer=init_mode, activation='relu'))
 
     if batchnormalize:
         model.add(layers.BatchNormalization())
 
-    model.add(layers.Activation(activation))
-
     if dropout:
-        model.add(Dropout(0.2))
+        model.add(Dropout(dropout_rate))
 
-def create_model(input_dimension, batch_size, epochs, hidden_layers, neurons, learn_rate, batchnormalize, init_mode):
+def create_model(input_dimension, hidden_layers, neurons, learn_rate, batchnormalize, init_mode, optimizer, dropout, dropout_rate, constant):
     model = keras.models.Sequential()
 
     model.add(layers.Dense(input_dimension, use_bias=False, activation='relu'))
 
-    # Implementation of a decreasing number of neurons in the hidden layers by a factor of 2
-    for i in range(1, hidden_layers+1):
-        if (neurons/2**(i-1)) > 1:
-            add_layer(model, int(neurons / (2 ** (i-1))), 'relu', init_mode, batchnormalize)
-        else:
-            add_layer(model, 2, batchnormalize=batchnormalize)
+    if constant:
+        for i in range(1, hidden_layers + 1):
+            add_layer(model=model, neurons=neurons, init_mode=init_mode, batchnormalize=batchnormalize, dropout=dropout, dropout_rate=dropout_rate)
+    else:
+        # Implementation of a decreasing number of neurons in the hidden layers by a factor of 2
+        for i in range(1, hidden_layers + 1):
+            if (neurons // (2 ** (i - 1))) > 1:
+                add_layer(model=model, neurons=(neurons // (2 ** (i - 1))), init_mode=init_mode,
+                          batchnormalize=batchnormalize, dropout=dropout, dropout_rate=dropout_rate)
+            else:
+                add_layer(model=model, neurons=2, batchnormalize=batchnormalize, dropout=dropout,
+                          dropout_rate=dropout_rate)
 
-        model.add(layers.Dense(1, use_bias=False))
+    model.add(layers.Dense(1, use_bias=False))
 
     # Compile model
-    model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
+    model.compile(optimizer=optimizer, lr=learn_rate, loss='mean_absolute_error')
     return model
 
-def train_and_evaluate_models(batchnorm, x_train, y_train, x_test, L2, parameter_dict):
+def train_and_evaluate_models(x_train, y_train, x_test, L2, parameter_dict):
 
     # region dict to variable transformation - just to make the code easier to read
     use_batchnormalization = parameter_dict['batchnorm']
@@ -67,6 +77,7 @@ def train_and_evaluate_models(batchnorm, x_train, y_train, x_test, L2, parameter
     epochs = parameter_dict['epochs']
     use_logarithm = parameter_dict['logarithm']
     use_normalization = parameter_dict['normalize']
+    constant = parameter_dict['constant']
     # endregion
 
     # region create model
@@ -74,13 +85,19 @@ def train_and_evaluate_models(batchnorm, x_train, y_train, x_test, L2, parameter
 
     model.add(layers.Dense(x_train.shape[1], use_bias=False, activation='relu'))
 
-    add_layer(model, 256, use_batchnormalization, dropout=use_dropout)
-    add_layer(model, 128, use_batchnormalization, dropout=use_dropout)
-    add_layer(model, 64, use_batchnormalization, dropout=use_dropout)
-    add_layer(model, 32, use_batchnormalization, dropout=use_dropout)
-    add_layer(model, 16, use_batchnormalization, dropout=use_dropout)
+    if constant:
+        add_layer(model, 256, batchnormalize=use_batchnormalization, dropout=use_dropout)
+        add_layer(model, 256, batchnormalize=use_batchnormalization, dropout=use_dropout)
+        add_layer(model, 256, batchnormalize=use_batchnormalization, dropout=use_dropout)
+        add_layer(model, 256, batchnormalize=use_batchnormalization, dropout=use_dropout)
+    else:
+        add_layer(model, 256, batchnormalize=use_batchnormalization, dropout=use_dropout)
+        add_layer(model, 128, batchnormalize=use_batchnormalization, dropout=use_dropout)
+        add_layer(model, 64, batchnormalize=use_batchnormalization, dropout=use_dropout)
+        add_layer(model, 32, batchnormalize=use_batchnormalization, dropout=use_dropout)
 
-    model.add(layers.Dense(1, use_bias=False))
+
+    model.add(layers.Dense(1, activation='linear'))
 
     # endregion
 
@@ -94,10 +111,21 @@ def train_and_evaluate_models(batchnorm, x_train, y_train, x_test, L2, parameter
         write_graph=True, write_images=True)
     # endregion
 
+    keras_callbacks = [
+        EarlyStopping(monitor='val_loss', patience=100, mode='min', min_delta=50),
+        ModelCheckpoint(CHECKPOINT_PATH, monitor='val_loss', save_best_only=True, mode='min')
+    ]
+
     model.compile(optimizer=optimizer, lr=lr, loss='mean_absolute_error')
 
+    # history = model.fit(x_train.to_numpy(), y_train.to_numpy(), epochs=epochs, batch_size=batch_size,
+    #                     validation_split=validation_split,  callbacks=[tensorboard], verbose=2)
+
+
     history = model.fit(x_train.to_numpy(), y_train.to_numpy(), epochs=epochs, batch_size=batch_size,
-                        validation_split=validation_split,  callbacks=[tensorboard], verbose=2)
+                        validation_split=validation_split, verbose=2, callbacks=keras_callbacks)
+
+    model = load_model(CHECKPOINT_PATH)
 
     # prediction on the test set
     prediction_list = model.predict(x_test)
@@ -113,7 +141,8 @@ def train_and_evaluate_models(batchnorm, x_train, y_train, x_test, L2, parameter
 
 def do_grid_search(x_train, y_train, param_grid, model_func, parameter_dict):
     model = KerasRegressor(build_fn=model_func, verbose=2)
-    grid = GridSearchCV(estimator=model, param_grid=param_grid, n_jobs=-1, cv=3)
+    grid = GridSearchCV(estimator=model, param_grid=param_grid, n_jobs=-2, cv=3)
+
     grid_result = grid.fit(x_train.to_numpy(), y_train.to_numpy())
 
     print("Best: %f using %s" % (grid_result.best_score_, grid_result.best_params_))
@@ -143,8 +172,16 @@ def do_grid_search(x_train, y_train, param_grid, model_func, parameter_dict):
 
     for mean, stdev, param in zip(means, stds, params):
         row_container = []
-        row_container.append(abs(int(mean)))
-        row_container.append(int(stdev))
+        if math.isnan(mean):
+            row_container.append('NaN')
+        else:
+            row_container.append(abs(int(mean)))
+
+        if math.isnan(stdev):
+            row_container.append('NaN')
+        else:
+            row_container.append(int(stdev))
+
         for value in param.values():
             row_container.append(value)
 
