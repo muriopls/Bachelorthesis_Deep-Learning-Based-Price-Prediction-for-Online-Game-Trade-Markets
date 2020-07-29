@@ -25,9 +25,7 @@ FEATURE_SET = SetOfFeatures.all_features
 TRAIN_SPLIT = 0.7
 
 
-FILE_PATH = 'C:/Users/murio/PycharmProjects/pricePrediction/Data/first_approach/PriceSnapshot_22-04-2020_xbox_modified.csv'
-#FILE_PATH = 'C:/Users/murio/PycharmProjects/pricePrediction/Data/first_approach/PriceSnapshot_22-04-2020_xbox_modified_newly_arranged.csv'
-
+FILE_PATH = '/Data/first_approach/PriceSnapshot_22-04-2020_xbox_modified.csv'
 # fix random seed for reproducibility
 
 np.random.seed(5)

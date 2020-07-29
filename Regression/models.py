@@ -19,14 +19,15 @@ from keras.callbacks import EarlyStopping, ModelCheckpoint
 from keras.models import load_model
 import pandas as pd
 
-# region export file initialization
+# region predefining
 EXPERIMENT_TIME = datetime.now().strftime("%Y%m%d_%H%M")
-BIG_EXPORT_PATH_FILE = "C:/Users/murio/PycharmProjects/Data/pricePrediction/price_differences/{}_{}.csv".format(
+BIG_EXPORT_PATH_FILE = "/{}_{}.csv".format(
     EXPERIMENT_TIME, "price_differences")
-EXPORT_PATH_FILE = "C:/Users/murio/PycharmProjects/Data/pricePrediction/optimization/{}_{}.csv".format(
+EXPORT_PATH_FILE = "/{}_{}.csv".format(
     EXPERIMENT_TIME, "rmse")
-CHECKPOINT_PATH = "C:/Users/murio/PycharmProjects/Data/pricePrediction/checkpoint/{}_{}.h5".format(
+CHECKPOINT_PATH = "/{}_{}.h5".format(
     EXPERIMENT_TIME, "model")
+TENSORBOARD_PATH = "\{}\{}_{}"
 # endregion
 
 # region Deep Learning
@@ -102,7 +103,7 @@ def train_and_evaluate_models(x_train, y_train, x_test, L2, parameter_dict):
     # endregion
 
     # region Tensorboard initialization
-    log_dir = "E:\Bachelorarbeit_Informatik\Auswertung\logs\{}\{}_{}".format(
+    log_dir = TENSORBOARD_PATH.format(
         EXPERIMENT_TIME, datetime.now().strftime("%d%m%Y_%H%M%S"), parameter_dict['name'])
 
     tensorboard = keras.callbacks.TensorBoard(
